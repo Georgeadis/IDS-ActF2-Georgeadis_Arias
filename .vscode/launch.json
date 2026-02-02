@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch aplicacionsimple.Principal",
+            "request": "launch",
+            "mainClass": "aplicacionsimple.Principal",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Compilar Java",
+            "console": "integratedTerminal"
+        }
+    ]
+}
