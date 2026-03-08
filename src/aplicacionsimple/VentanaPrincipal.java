@@ -22,6 +22,13 @@ public class VentanaPrincipal extends JFrame {
 
     private JComboBox<String> cbPrograma;
     // Lista desplegable para seleccionar la licenciatura o maestria
+    private JButton btnCalificaciones;
+    private JComboBox<String> cbAlumnos;
+    private JButton btnActualizarLista;
+    private JTextField txtBuscar;
+    private JButton btnBuscar;
+    private java.util.List<Alumno> cbCurrentAlumnos = new java.util.ArrayList<>();
+    private JButton btnBuscarAlumnos;
 
     public VentanaPrincipal() {
         // Constructor de la clase
@@ -30,45 +37,32 @@ public class VentanaPrincipal extends JFrame {
         setTitle("Universidad Ciudadana de Nuevo Leon");
         // Define el titulo de la ventana
 
-        setSize(700, 400);
+        setSize(1000, 500);
         // Establece el tamaño de la ventana en pixeles
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         // Finaliza la aplicacion cuando se cierra la ventana
 
-        setLayout(new GridLayout(7, 2, 10, 10));
-        // Define el diseño de la ventana:
-        // 7 filas, 2 columnas, con separacion horizontal y vertical
+        // Usar GridBagLayout para una mejor alineación y espaciamiento
+        setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(6, 8, 6, 8);
 
         txtNombre = new JTextField();
         txtApellidos = new JTextField();
-        // Inicializa los campos de texto vacios
+        txtNombre.setPreferredSize(new Dimension(320, 26));
+        txtApellidos.setPreferredSize(new Dimension(320, 26));
 
         spFecha = new JSpinner(new SpinnerDateModel());
-        // Inicializa el spinner con un modelo de fechas
-
         spFecha.setEditor(new JSpinner.DateEditor(spFecha, "dd/MM/yyyy"));
-        // Establece el formato de fecha dia/mes/año
-
-        // Boton que permite abrir un selector de fecha adicional
         JButton btnCalendario = new JButton("📅");
-        // icono visual del boton calendario
-
         btnCalendario.setToolTipText("Seleccionar fecha");
-        // Texto que aparece al pasar el mouse sobre el boton
-
         btnCalendario.addActionListener(e -> {
-            // Accion que se ejecuta al presionar el boton calendario
-
             Date d = showDatePicker((Date) spFecha.getValue());
-            // Llama al metodo que muestra el selector de fecha personalizado
-
             if (d != null) spFecha.setValue(d);
-            // Si se selecciona una fecha valida, se asigna al spinner
         });
 
         cbPrograma = new JComboBox<>(new String[]{
-            // Programas academicos disponibles para inscripcion
             "Licenciatura en Administracion con acentuacion en Empresas",
             "Licenciatura en Ingenieria en Desarrollo de Software",
             "Licenciatura en Logistica, Aduanas y Comercio",
@@ -79,52 +73,66 @@ public class VentanaPrincipal extends JFrame {
             "Maestria en Administracion con acentuacion en Planeacion Estrategica"
         });
 
-        // Botones principales de la aplicacion
         JButton btnGuardar = new JButton("Guardar");
-        // Guarda la informacion del alumno
-
         JButton btnListado = new JButton("Listado de alumnos");
-        // Muestra todos los alumnos registrados
-
         JButton btnLic = new JButton("Alumnos por licenciatura");
-        // Muestra solo alumnos inscritos en licenciaturas
-
         JButton btnMtr = new JButton("Alumnos por maestria");
-        // Muestra solo alumnos inscritos en maestrias
-
         JButton btnSalir = new JButton("Salir");
-        // Cierra la aplicacion
 
-        // Etiquetas descriptivas y campos de entrada
-        add(new JLabel("Nombre:"));
-        add(txtNombre);
+        btnCalificaciones = new JButton("Calificaciones");
+        btnCalificaciones.setToolTipText("Ver calificaciones (solo Desarrollo de Software)");
+        btnCalificaciones.setVisible(false);
 
-        add(new JLabel("Apellidos:"));
-        add(txtApellidos);
+        // Campo de búsqueda y selector de alumnos guardados (ocultos en la vista principal)
+        txtBuscar = new JTextField();
+        btnBuscar = new JButton("Buscar");
+        cbAlumnos = new JComboBox<>();
+        btnActualizarLista = new JButton("Actualizar lista");
 
-        add(new JLabel("Fecha de nacimiento:"));
+        JPanel pBuscar = new JPanel(new BorderLayout(4,0));
+        pBuscar.add(txtBuscar, BorderLayout.CENTER);
+        pBuscar.add(btnBuscar, BorderLayout.EAST);
 
-        // Panel auxiliar que contiene el spinner de fecha y el boton calendario
-        JPanel pFecha = new JPanel(new BorderLayout(4, 0));
-        // BorderLayout permite colocar componentes uno junto a otro
+        JPanel pAl = new JPanel(new BorderLayout(4,0));
+        pAl.add(cbAlumnos, BorderLayout.CENTER);
+        pAl.add(btnActualizarLista, BorderLayout.EAST);
 
-        pFecha.add(spFecha, BorderLayout.CENTER);
-        // Spinner en el centro del panel
+        btnBuscarAlumnos = new JButton("Buscar alumnos");
+        btnBuscarAlumnos.addActionListener(evt -> new VentanaBusqueda(this).setVisible(true));
 
-        pFecha.add(btnCalendario, BorderLayout.EAST);
-        // Boton calendario a la derecha
+        // Row 0: search label + field (hidden by default)
+        c.gridx = 0; c.gridy = 0; c.anchor = GridBagConstraints.WEST; add(new JLabel("Buscar (nombre/apellido):"), c);
+        c.gridx = 1; c.gridy = 0; c.fill = GridBagConstraints.HORIZONTAL; c.weightx = 1.0; add(pBuscar, c);
 
-        add(pFecha);
+        // Row 1: alumnos label + selector (hidden by default)
+        c.gridx = 0; c.gridy = 1; c.fill = GridBagConstraints.NONE; c.weightx = 0; add(new JLabel("Alumnos:"), c);
+        c.gridx = 1; c.gridy = 1; c.fill = GridBagConstraints.HORIZONTAL; add(pAl, c);
 
-        add(new JLabel("Programa:"));
-        add(cbPrograma);
+        // Row 2: Nombre
+        c.gridx = 0; c.gridy = 2; c.fill = GridBagConstraints.NONE; add(new JLabel("Nombre:"), c);
+        c.gridx = 1; c.gridy = 2; c.fill = GridBagConstraints.HORIZONTAL; add(txtNombre, c);
 
-        // Agrega los botones a la ventana
-        add(btnGuardar);
-        add(btnListado);
-        add(btnLic);
-        add(btnMtr);
-        add(btnSalir);
+        // Row 3: Apellidos
+        c.gridx = 0; c.gridy = 3; c.fill = GridBagConstraints.NONE; add(new JLabel("Apellidos:"), c);
+        c.gridx = 1; c.gridy = 3; c.fill = GridBagConstraints.HORIZONTAL; add(txtApellidos, c);
+
+        // Row 4: Fecha
+        c.gridx = 0; c.gridy = 4; c.fill = GridBagConstraints.NONE; add(new JLabel("Fecha de nacimiento:"), c);
+        JPanel pFecha = new JPanel(new BorderLayout(4,0)); pFecha.add(spFecha, BorderLayout.CENTER); pFecha.add(btnCalendario, BorderLayout.EAST);
+        c.gridx = 1; c.gridy = 4; c.fill = GridBagConstraints.HORIZONTAL; add(pFecha, c);
+
+        // Row 5: Programa
+        c.gridx = 0; c.gridy = 5; c.fill = GridBagConstraints.NONE; add(new JLabel("Programa:"), c);
+        c.gridx = 1; c.gridy = 5; c.fill = GridBagConstraints.HORIZONTAL; add(cbPrograma, c);
+
+        // Row 6: botones (panel que abarca dos columnas)
+        JPanel pButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));
+        pButtons.add(btnGuardar); pButtons.add(btnListado); pButtons.add(btnLic); pButtons.add(btnMtr); pButtons.add(btnBuscarAlumnos); pButtons.add(btnCalificaciones); pButtons.add(btnSalir);
+        c.gridx = 0; c.gridy = 6; c.gridwidth = 2; c.fill = GridBagConstraints.HORIZONTAL; add(pButtons, c);
+
+        // Ocultar los paneles embebidos de búsqueda para mantener la ventana como formulario de inscripción
+        pBuscar.setVisible(false);
+        pAl.setVisible(false);
 
         // =====================
         // ASIGNACIoN DE EVENTOS
@@ -144,7 +152,63 @@ public class VentanaPrincipal extends JFrame {
 
         btnSalir.addActionListener(e -> dispose());
         // Cierra la ventana actual
+
+        // Mostrar/ocultar boton Calificaciones segun programa seleccionado
+        cbPrograma.addActionListener(e -> {
+            String sel = cbPrograma.getSelectedItem() != null ? cbPrograma.getSelectedItem().toString() : "";
+            boolean esDev = sel.contains("Ingenieria en Desarrollo de Software");
+            btnCalificaciones.setVisible(esDev);
+        });
+
+        // Acción para actualizar la lista de alumnos
+        btnActualizarLista.addActionListener(e -> refreshAlumnosList());
+        btnBuscar.addActionListener(e -> refreshAlumnosListFiltered(txtBuscar.getText().trim()));
+
+        // Cuando se selecciona un alumno en la lista, poblar campos
+        cbAlumnos.addActionListener(e -> {
+            int idx = cbAlumnos.getSelectedIndex();
+            if (idx <= 0) {
+                txtNombre.setText("");
+                txtApellidos.setText("");
+                cbPrograma.setSelectedIndex(0);
+                btnCalificaciones.setVisible(false);
+                return;
+            }
+            Alumno a = cbCurrentAlumnos.get(idx - 1);
+            txtNombre.setText(a.getNombre());
+            txtApellidos.setText(a.getApellidos());
+            spFecha.setValue(a.getFechaNacimiento());
+            cbPrograma.setSelectedItem(a.getPrograma());
+            btnCalificaciones.setVisible(a.getPrograma().contains("Ingenieria en Desarrollo de Software"));
+        });
+
+        btnCalificaciones.addActionListener(e -> new VentanaCalificacionesBusqueda(this).setVisible(true));
     }
+
+    private void refreshAlumnosList() {
+        refreshAlumnosListFiltered("");
+    }
+
+    private void refreshAlumnosListFiltered(String q) {
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+        model.addElement("-- Nuevo alumno --");
+        cbCurrentAlumnos.clear();
+        for (Alumno a : BaseDatos.alumnos) {
+            if (q == null || q.isEmpty()) {
+                cbCurrentAlumnos.add(a);
+                model.addElement(a.toString());
+            } else {
+                String txt = (a.getNombre() + " " + a.getApellidos()).toLowerCase();
+                if (txt.contains(q.toLowerCase())) {
+                    cbCurrentAlumnos.add(a);
+                    model.addElement(a.toString());
+                }
+            }
+        }
+        cbAlumnos.setModel(model);
+    }
+
+    
 
     private void guardarAlumno() {
         // Metodo que valida la informacion y guarda un nuevo alumno
@@ -160,15 +224,29 @@ public class VentanaPrincipal extends JFrame {
             return;
         }
 
-        Alumno a = new Alumno(
+        String programaSel = cbPrograma.getSelectedItem().toString();
+        // Crear Alumno especializado si corresponde a Desarrollo de Software
+        if (programaSel.contains("Ingenieria en Desarrollo de Software")) {
+            java.util.List<Materia> materias = java.util.Arrays.asList(
+                new Programacion(), new EstructurasDatos(), new BasesDeDatosMateria(), new IngenieriaSoftwareMateria(), new Redes()
+            );
+            AlumnoDesarrolloSoftware ads = new AlumnoDesarrolloSoftware(
                 txtNombre.getText(),
                 txtApellidos.getText(),
                 (Date) spFecha.getValue(),
-                cbPrograma.getSelectedItem().toString()
-        );
-        // Crea un objeto Alumno con los datos ingresados
-
-        BaseDatos.agregarAlumno(a);
+                programaSel,
+                materias
+            );
+            BaseDatos.agregarAlumno(ads);
+        } else {
+            Alumno a = new Alumno(
+                txtNombre.getText(),
+                txtApellidos.getText(),
+                (Date) spFecha.getValue(),
+                programaSel
+            );
+            BaseDatos.agregarAlumno(a);
+        }
         // Agrega el alumno a la base de datos en memoria
 
         JOptionPane.showMessageDialog(this, "Alumno guardado correctamente");

@@ -47,6 +47,14 @@ public class Alumno {
         return fechaNacimiento;
     }
 
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getApellidos() {
+        return apellidos;
+    }
+
     @Override
     public String toString() {
         // Metodo que convierte el objeto Alumno a una cadena de texto

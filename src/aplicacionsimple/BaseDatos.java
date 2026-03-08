@@ -4,6 +4,8 @@ package aplicacionsimple;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
+import java.util.Random;
+import java.util.Arrays;
 // Importacion de clases necesarias para listas dinamicas y fechas
 
 public class BaseDatos {
@@ -53,6 +55,31 @@ public class BaseDatos {
         // Alumnos inscritos en la Maestria en Educacion con acentuacion en Tecnologia Educativa
 
         // Fin de la inicializacion de la base de datos
+    }
+
+    // Tras la carga inicial, convertir alumnos de Desarrollo de Software a la subclase y asignar calificaciones ficticias
+    static {
+        List<Alumno> converted = new ArrayList<>();
+        for (Alumno a : alumnos) {
+            if (a.getPrograma().contains("Ingenieria en Desarrollo de Software")) {
+                List<Materia> materias = Arrays.asList(
+                        new Programacion(), new EstructurasDatos(), new BasesDeDatosMateria(), new IngenieriaSoftwareMateria(), new Redes()
+                );
+                AlumnoDesarrolloSoftware ads = new AlumnoDesarrolloSoftware(a.getNombre(), a.getApellidos(), a.getFechaNacimiento(), a.getPrograma(), materias);
+                // semilla deterministica por nombre para reproducibilidad
+                Random r = new Random((a.getNombre()+a.getApellidos()).hashCode());
+                for (Materia m : materias) {
+                    double cal = 6.0 + r.nextDouble() * 4.0; // rango 6.0 - 10.0
+                    cal = Math.round(cal * 10.0) / 10.0; // una cifra decimal
+                    ads.setCalificacion(m.getNombre(), cal);
+                }
+                converted.add(ads);
+            } else {
+                converted.add(a);
+            }
+        }
+        alumnos.clear();
+        alumnos.addAll(converted);
     }
 
     public static void agregarAlumno(Alumno a) {
